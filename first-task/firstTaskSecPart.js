@@ -1,26 +1,23 @@
 const fs = require("fs");
+const readline = require('readline');
 
-fs.readFile("input.txt", "utf8", (err, data) => {
-  if (err) throw err;
+const rl = readline.createInterface({
+  input: fs.createReadStream('input.txt', { encoding: 'utf-8' })
+});
 
-  console.time("Execution Time");
-  let input = data.split("\n");
+console.time('Starting')
+let totalSum = 0;
 
+rl.on('line', (line) => {
+  let input = line.split("\n");
   let reversedArr = [...input];
   let forwardArr = [...input];
   let firstElementsArr = [];
   let lastElementsArr = [];
 
   const numberWords = [
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
+    "one", "two", "three", "four", "five",
+    "six", "seven", "eight", "nine"
   ];
 
   for (let x = 0; x < reversedArr.length; x++) {
@@ -34,7 +31,6 @@ fs.readFile("input.txt", "utf8", (err, data) => {
       for (let word of numberWords) {
         let revSubstring = currentString.substring(i - word.length + 1, i + 1);
         if (revSubstring === word) {
-          // Replace the found substring with a number
           currentString =
             currentString.substring(0, i - word.length + 1) +
             (numberWords.indexOf(word) + 1) +
@@ -44,25 +40,21 @@ fs.readFile("input.txt", "utf8", (err, data) => {
         }
       }
     }
-    // Updating inputArr with replaced number
     reversedArr[x] = currentString;
   }
 
-  let lastEl;
-  //Searching last element number in string
+  // Searching last element number in string
   for (let i = 0; i < reversedArr.length; i++) {
     let currString = reversedArr[i];
     for (let z = currString.length - 1; z >= 0; z--) {
       if (parseInt(currString[z], 10)) {
-        lastEl = currString[z];
-        lastElementsArr.push(lastEl);
+        lastElementsArr.push(currString[z]);
         break;
       }
     }
   }
 
-  //----------------------------Forward array--------------------------------//
-
+  // Process forwardArr to replace words with numbers
   for (let x = 0; x < forwardArr.length; x++) {
     let currentString = forwardArr[x];
     let found = false;
@@ -73,7 +65,6 @@ fs.readFile("input.txt", "utf8", (err, data) => {
       for (let word of numberWords) {
         let forwSubstring = currentString.substring(i, i + word.length);
         if (forwSubstring === word) {
-          // Replace the found substring with a number
           currentString = currentString.replace(
             forwSubstring,
             numberWords.indexOf(word) + 1
@@ -83,35 +74,31 @@ fs.readFile("input.txt", "utf8", (err, data) => {
         }
       }
     }
-    // Updating forwardArr with replaced number
     forwardArr[x] = currentString;
   }
 
-  let firstEl;
-  //Searching forward first element number in string
+  // Searching forward first element number in string
   for (let i = 0; i < forwardArr.length; i++) {
     let currString = forwardArr[i];
     for (let z = 0; z < currString.length; z++) {
       if (parseInt(currString[z], 10)) {
-        firstEl = currString[z];
-        firstElementsArr.push(firstEl);
+        firstElementsArr.push(currString[z]);
         break;
       }
     }
   }
 
-  let sum = 0;
-
+  // Calculate the sum of merged first and last elements
   for (let i = 0; i < firstElementsArr.length; i++) {
     const firstEl = firstElementsArr[i];
     const lastEl = lastElementsArr[i];
     const mergedNumbers = Number(`${firstEl}${lastEl}`);
 
-    sum += mergedNumbers;
+    totalSum += mergedNumbers;
   }
-
-  console.log(sum);
-  console.timeEnd("Execution Time");
 });
 
-//readline, readStream.. chunks... read line by line code
+rl.on('close', () => {
+  console.log(totalSum);
+  console.timeEnd('Starting')
+});
