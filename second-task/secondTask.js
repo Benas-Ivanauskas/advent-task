@@ -1,10 +1,16 @@
 const fs = require("fs");
+const Readline=require('readline')
 
-fs.readFile("input.txt", "utf-8", (err, input) => {
-  if (err) throw err;
-  let gamesArr = input.split("\n");
+const rl=Readline.createInterface({
+  input:fs.createReadStream('input.txt',{encoding:'utf-8'})
+})
 
-  let totalSum = 0;
+console.time('Starting')
+
+let totalSum = 0;
+
+rl.on('line',(line)=>{
+  let gamesArr = line.split("\n");
 
   for (let x = 0; x < gamesArr.length; x++) {
     let gameString = gamesArr[x];
@@ -48,7 +54,11 @@ fs.readFile("input.txt", "utf-8", (err, input) => {
 
     if (allConditionsMet) {
       totalSum += Number(id);
-      console.log(`game won:${id}`, totalSum);
     }
   }
-});
+})
+
+rl.on('close',()=>{
+  console.log(totalSum)
+  console.timeEnd('Starting')
+})
