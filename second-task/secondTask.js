@@ -1,15 +1,15 @@
 const fs = require("fs");
-const Readline=require('readline')
+const Readline = require("readline");
 
-const rl=Readline.createInterface({
-  input:fs.createReadStream('input.txt',{encoding:'utf-8'})
-})
+const rl = Readline.createInterface({
+  input: fs.createReadStream("input.txt", { encoding: "utf-8" }),
+});
 
-console.time('Starting')
+console.time("Starting");
 
 let totalSum = 0;
 
-rl.on('line',(line)=>{
+rl.on("line", (line) => {
   let gamesArr = line.split("\n");
 
   for (let x = 0; x < gamesArr.length; x++) {
@@ -56,9 +56,12 @@ rl.on('line',(line)=>{
       totalSum += Number(id);
     }
   }
-})
+});
 
-rl.on('close',()=>{
-  console.log(totalSum)
-  console.timeEnd('Starting')
-})
+rl.on("close", () => {
+  console.log(totalSum);
+  console.timeEnd("Starting");
+});
+
+//Refactorinti advent code 1 taska i skaitoma koda
+//Padaryti unit testus su JEST

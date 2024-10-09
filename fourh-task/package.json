@@ -1,0 +1,15 @@
+{
+  "name": "fourh-task",
+  "version": "1.0.0",
+  "main": "fourthTask.js",
+  "scripts": {
+    "test": "jest --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "jest": "^29.7.0"
+  }
+}

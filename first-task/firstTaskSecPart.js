@@ -1,104 +1,136 @@
 const fs = require("fs");
-const readline = require('readline');
+const readline = require("readline");
 
-const rl = readline.createInterface({
-  input: fs.createReadStream('input.txt', { encoding: 'utf-8' })
-});
+const NUMBERWORDS = [
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+];
 
-console.time('Starting')
-let totalSum = 0;
+async function main() {
+  try {
+    const result = await processFile("input.txt");
+    console.log("Total sum result:", result);
+  } catch (error) {
+    console.error("An error occurred:", error.message);
+  }
+}
 
-rl.on('line', (line) => {
-  let input = line.split("\n");
-  let reversedArr = [...input];
-  let forwardArr = [...input];
-  let firstElementsArr = [];
-  let lastElementsArr = [];
+function processGame(gameString) {
+  let totalSum = 0;
 
-  const numberWords = [
-    "one", "two", "three", "four", "five",
-    "six", "seven", "eight", "nine"
-  ];
+  let stringsArray = searchingSubstring([gameString], replaceSubstring, false);
+  let reversedArr = searchingSubstring([gameString], replaceSubstring, true);
 
-  for (let x = 0; x < reversedArr.length; x++) {
-    let currentString = reversedArr[x];
-    let found = false;
+  let firstElementsArr = findElements(stringsArray, true);
+  let lastElementsArr = findElements(reversedArr, false);
 
-    // Reversed searching substring
-    for (let i = currentString.length - 1; i >= 0; i--) {
+  totalSum = mergedElementsSum(firstElementsArr, lastElementsArr, totalSum);
+  return totalSum;
+}
+
+function searchingSubstring(arr, replaceFunction, isReverse) {
+  for (let x = 0; x < arr.length; x++) {
+    let currentString = arr[x];
+    arr[x] = replaceFunction(currentString, isReverse);
+  }
+  return arr;
+}
+
+function replaceSubstring(string, isReverse) {
+  let found = false;
+
+  if (isReverse) {
+    for (let i = string.length - 1; i >= 0; i--) {
       if (found) break;
-
-      for (let word of numberWords) {
-        let revSubstring = currentString.substring(i - word.length + 1, i + 1);
+      for (let word of NUMBERWORDS) {
+        let wordLength = word.length;
+        let revSubstring = string.substring(i - wordLength + 1, i + 1);
         if (revSubstring === word) {
-          currentString =
-            currentString.substring(0, i - word.length + 1) +
-            (numberWords.indexOf(word) + 1) +
-            currentString.substring(i + 1);
+          string =
+            string.substring(0, i - wordLength + 1) +
+            (NUMBERWORDS.indexOf(word) + 1) +
+            string.substring(i + 1);
           found = true;
           break;
         }
       }
     }
-    reversedArr[x] = currentString;
-  }
-
-  // Searching last element number in string
-  for (let i = 0; i < reversedArr.length; i++) {
-    let currString = reversedArr[i];
-    for (let z = currString.length - 1; z >= 0; z--) {
-      if (parseInt(currString[z], 10)) {
-        lastElementsArr.push(currString[z]);
-        break;
-      }
-    }
-  }
-
-  // Process forwardArr to replace words with numbers
-  for (let x = 0; x < forwardArr.length; x++) {
-    let currentString = forwardArr[x];
-    let found = false;
-
-    for (let i = 0; i < currentString.length; i++) {
+  } else {
+    for (let i = 0; i < string.length; i++) {
       if (found) break;
-
-      for (let word of numberWords) {
-        let forwSubstring = currentString.substring(i, i + word.length);
+      for (let word of NUMBERWORDS) {
+        let forwSubstring = string.substring(i, i + word.length);
         if (forwSubstring === word) {
-          currentString = currentString.replace(
-            forwSubstring,
-            numberWords.indexOf(word) + 1
-          );
+          string = string.replace(forwSubstring, NUMBERWORDS.indexOf(word) + 1);
           found = true;
           break;
         }
       }
     }
-    forwardArr[x] = currentString;
   }
+  return string;
+}
 
-  // Searching forward first element number in string
-  for (let i = 0; i < forwardArr.length; i++) {
-    let currString = forwardArr[i];
-    for (let z = 0; z < currString.length; z++) {
-      if (parseInt(currString[z], 10)) {
-        firstElementsArr.push(currString[z]);
-        break;
+function findElements(arr, isFirst) {
+  let result = [];
+  for (let i = 0; i < arr.length; i++) {
+    let currString = arr[i];
+    if (isFirst) {
+      for (let z = 0; z < currString.length; z++) {
+        if (parseInt(currString[z], 10)) {
+          result.push(currString[z]);
+          break;
+        }
+      }
+    } else {
+      for (let z = currString.length - 1; z >= 0; z--) {
+        if (parseInt(currString[z], 10)) {
+          result.push(currString[z]);
+          break;
+        }
       }
     }
   }
+  return result;
+}
 
-  // Calculate the sum of merged first and last elements
+function mergedElementsSum(firstElementsArr, lastElementsArr, totalSum) {
   for (let i = 0; i < firstElementsArr.length; i++) {
     const firstEl = firstElementsArr[i];
     const lastEl = lastElementsArr[i];
     const mergedNumbers = Number(`${firstEl}${lastEl}`);
-
     totalSum += mergedNumbers;
   }
-});
+  return totalSum;
+}
 
-rl.on('close', () => {
-  console.log(totalSum);
-  console.timeEnd('Starting')
-});
+async function processFile(filePath) {
+  const fileStream = fs.createReadStream(filePath, { encoding: "utf-8" });
+  const rl = readline.createInterface({ input: fileStream });
+
+  let totalSum = 0;
+
+  for await (const line of rl) {
+    totalSum += processGame(line.trim());
+  }
+
+  return totalSum;
+}
+
+main();
+
+module.exports = {
+  mergedElementsSum,
+  findElements,
+  replaceSubstring,
+  searchingSubstring,
+  processGame,
+  processFile,
+};
